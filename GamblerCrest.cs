@@ -1,0 +1,41 @@
+using BepInEx;
+using BepInEx.Logging;
+using HarmonyLib;
+using GamblerCrest.Patches;
+using GamblerCrest.Patches.Localization;
+using UnityEngine.SceneManagement;
+
+namespace GamblerCrest
+{
+    [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
+    public class GamblerCrest : BaseUnityPlugin
+    {
+        public static ManualLogSource logger;
+        public static Harmony harmony;
+
+        private void Awake()
+        {
+            // Put your initialization logic here
+            logger = Logger;
+            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has loaded!");
+            harmony = new("com.example.patch");
+            harmony.PatchAll(typeof(SetupAndAddCrest));
+            harmony.PatchAll(typeof(BlackFlash));
+            harmony.PatchAll(typeof(Gamba));
+            harmony.PatchAll(typeof(AlterLayering));
+
+            SceneManager.activeSceneChanged += OnSceneChanged;
+        }
+
+        private void OnSceneChanged(Scene prev, Scene next)
+        {
+            if (next.name != "Menu_Title")
+            {
+                if (!Localization.LocalizationPatched)
+                {
+                    harmony.PatchAll(typeof(Localization));
+                }
+            }
+        }
+    }
+}

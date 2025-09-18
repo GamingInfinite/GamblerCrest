@@ -1,6 +1,5 @@
 ﻿using System;
 using HarmonyLib;
-using GamblerCrest.Extensions;
 using UnityEngine;
 
 namespace GamblerCrest.Patches
@@ -17,13 +16,13 @@ namespace GamblerCrest.Patches
                 int damageDealt = Mathf.RoundToInt(hitInstance.DamageDealt * hitInstance.Multiplier);
                 float blackFlashDamage = (float)(Math.Pow(damageDealt, 2.5) - damageDealt);
 
-                if (enemyHealth.GetSendDamageTo() == null)
+                if (enemyHealth.sendDamageTo == null)
                 {
                     enemyHealth.hp = Mathf.Max(Mathf.RoundToInt(enemyHealth.hp - blackFlashDamage), -1000);
                 }
                 else
                 {
-                    enemyHealth.GetSendDamageTo().hp = Mathf.Max(Mathf.RoundToInt(enemyHealth.hp - blackFlashDamage), -1000);
+                    enemyHealth.sendDamageTo.hp = Mathf.Max(Mathf.RoundToInt(enemyHealth.hp - blackFlashDamage), -1000);
                 }
             }
         }

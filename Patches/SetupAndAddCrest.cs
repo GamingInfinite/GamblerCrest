@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using HarmonyLib;
 using TeamCherry.Localization;
-using GamblerCrest.Extensions;
 using UnityEngine;
 using Silksong.FsmUtil;
 using HutongGames.PlayMaker;
+using GenericVariableExtension;
 using HutongGames.PlayMaker.Actions;
-using System.Reflection;
+using GamblerCrest.Utils;
 
 namespace GamblerCrest.Patches
 {
@@ -28,26 +28,27 @@ namespace GamblerCrest.Patches
             ToolCrest reaper = toolCrests[3];
 
             Sprite crestGlow = reaper.CrestGlow;
-            Sprite crestSilhouette = reaper.CrestSilhouette;
+
+            Texture2D diceCrestSilhouette = ModHelper.LoadTexFromAssembly("GamblerCrest.Resources.Images.gamblerCrestSilhouette.png");
+            Sprite crestSilhouette = Sprite.Create(diceCrestSilhouette, new(0, 0, diceCrestSilhouette.width, diceCrestSilhouette.height), new(0.5f, 0.5f), 300f);
 
             Texture2D diceCrest = ModHelper.LoadTexFromAssembly("GamblerCrest.Resources.Images.gamblerCrest.png");
-            Sprite crestSprite = Sprite.Create(diceCrest, new(0,0, diceCrest.width, diceCrest.height), new(0.5f,0.5f), 166.67f);
+            Sprite crestSprite = Sprite.Create(diceCrest, new(0, 0, diceCrest.width, diceCrest.height), new(0.5f, 0.5f), 166.67f);
             HeroControllerConfig heroConfig = hunter.HeroConfig;
 
-            ToolCrest crestData = new ToolCrest();
-            crestData.name = "GAMBLER";
-            crestData.SetCrestGlow(crestGlow);
-            crestData.SetCrestSilhouette(crestSilhouette);
-            crestData.SetCrestSprite(crestSprite);
-            crestData.SetHeroControllerConfig(heroConfig);
+            GamblerCrestUtils.gamblerCrestData.name = "GAMBLER";
+            GamblerCrestUtils.gamblerCrestData.crestGlow = crestGlow;
+            GamblerCrestUtils.gamblerCrestData.crestSilhouette = crestSilhouette;
+            GamblerCrestUtils.gamblerCrestData.crestSprite = crestSprite;
+            GamblerCrestUtils.gamblerCrestData.heroConfig = heroConfig;
 
             LocalisedString dispName = new LocalisedString() { Key = "GAMBLERCRESTNAME", Sheet = "GAMBLER" };
             LocalisedString description = new LocalisedString() { Key = "GAMBLERCRESTDESC", Sheet = "GAMBLER" };
 
-            crestData.SetDisplayName(dispName);
-            crestData.SetDisplayDesc(description);
+            GamblerCrestUtils.gamblerCrestData.displayName = dispName;
+            GamblerCrestUtils.gamblerCrestData.description = description;
 
-            crestData.SetSlotInfo([
+            GamblerCrestUtils.gamblerCrestData.slots = [
                 new() {
                     AttackBinding = AttackToolBinding.Neutral,
                     Type = ToolItemType.Skill,
@@ -118,27 +119,64 @@ namespace GamblerCrest.Patches
                     NavDownIndex = -1,
                     NavDownFallbackIndex = -1,
                 },
-            ]);
-            crestData.SaveData = new ToolCrestsData.Data
-            {
-                IsUnlocked = true,
-                Slots = [],
-                DisplayNewIndicator = true,
-            };
+            ];
+            GamblerCrestUtils.gamblerCrestData.SaveData = GamblerCrestUtils.crestSave;
 
-            ToolItemManager.Instance.AddCrest(crestData);
+            ToolItemManager.Instance.crestList.Add(GamblerCrestUtils.gamblerCrestData);
 
             PlayMakerFSM bind = __instance.gameObject.GetFsmPreprocessed("Bind");
-            FsmState[] bindStates = bind.FsmStates;
-            foreach (var state in bindStates)
+            FsmState BindType = bind.GetState("Bind Type");
+
+            FsmState GamblerBind = bind.AddState("Gambler Bind");
+            BindType.AddTransition("GAMBLER", GamblerBind.name);
+            BindType.AddLambdaMethod((action) =>
             {
-                //ModHelper.Log(state.Name);
-            }
-            FsmState doBind = bind.GetState("Do Bind");
-            foreach (FsmStateAction action in doBind.ActiveActions)
+                if (GamblerCrestUtils.gamblerCrestData.IsEquipped)
+                {
+                    bind.SendEvent("GAMBLER");
+                }
+            });
+
+            GamblerBind.AddLambdaMethod((action) =>
             {
-                ModHelper.Log(action.Name);
-            }
+                bind.GetIntVariable("Bind Amount").Value = 1;
+                bind.GetFloatVariable("Bind Time").Value = 1.2f;
+
+                int randomChance = Random.Range(1, 21);
+                randomChance = 20;
+                GamblerCrest.logger.LogInfo($"{randomChance}");
+
+                if (randomChance == 20)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = PlayerData.instance.maxHealth;
+                    GamblerCrestUtils.inFeverState = true;
+                } else if (randomChance >= 17)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = 3;
+                } else if (randomChance >= 14)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = 2;
+                } else if (randomChance >= 9)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = 1;
+                } else if (randomChance >= 5)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = 0;
+                } else if (randomChance >= 2)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = -1;
+                } else if (randomChance == 1)
+                {
+                    bind.GetIntVariable("Heal Amount").Value = -2;
+                }
+            });
+
+            FsmState QuickBind = bind.GetState("Quick Bind?");
+            GamblerBind.AddTransition("FINISHED", QuickBind.name);
+            GamblerBind.AddLambdaMethod((action) =>
+            {
+                bind.SendEvent("FINISHED");
+            });
         }
     }
 }

@@ -4,6 +4,8 @@ using HarmonyLib;
 using GamblerCrest.Patches;
 using GamblerCrest.Patches.Localization;
 using UnityEngine.SceneManagement;
+using UnityEngine;
+using GamblerCrest.Utils;
 
 namespace GamblerCrest
 {
@@ -21,10 +23,18 @@ namespace GamblerCrest
             harmony = new("com.example.patch");
             harmony.PatchAll(typeof(SetupAndAddCrest));
             harmony.PatchAll(typeof(BlackFlash));
-            harmony.PatchAll(typeof(Gamba));
             harmony.PatchAll(typeof(AlterLayering));
+            SaveGameSavesModdedCrest.Apply(harmony);
 
             SceneManager.activeSceneChanged += OnSceneChanged;
+        }
+
+        private void Update()
+        {
+            if (GamblerCrestUtils.inFeverState)
+            {
+                GamblerCrestUtils.HealFeverState();
+            }
         }
 
         private void OnSceneChanged(Scene prev, Scene next)

@@ -35,6 +35,16 @@ namespace GamblerCrest
             {
                 GamblerCrestUtils.HealFeverState();
             }
+
+            if (GamblerCrestUtils.feverTimer > 0)
+            {
+                GamblerCrestUtils.feverTimer -= Time.deltaTime;
+            }
+
+            if (GamblerCrestUtils.feverTimer <= 0)
+            {
+                GamblerCrestUtils.inFeverState = false;
+            }
         }
 
         private void OnSceneChanged(Scene prev, Scene next)

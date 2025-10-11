@@ -24,6 +24,7 @@ namespace GamblerCrest
             harmony.PatchAll(typeof(SetupAndAddCrest));
             harmony.PatchAll(typeof(BlackFlash));
             harmony.PatchAll(typeof(AlterLayering));
+            harmony.PatchAll(typeof(NeedleArtWhiffPunish));
             SaveGameSavesModdedCrest.Apply(harmony);
 
             SceneManager.activeSceneChanged += OnSceneChanged;
@@ -31,9 +32,15 @@ namespace GamblerCrest
 
         private void Update()
         {
-            if (GamblerCrestUtils.inFeverState)
+            if (GamblerCrestUtils.InFeverState)
             {
                 GamblerCrestUtils.HealFeverState();
+
+                if (GamblerCrestUtils.feverTimer <= 0)
+                {
+                    GamblerCrestUtils.InFeverState = false;
+                    GamblerCrestUtils.stopAura();
+                }
             }
 
             if (GamblerCrestUtils.feverTimer > 0)
@@ -41,9 +48,14 @@ namespace GamblerCrest
                 GamblerCrestUtils.feverTimer -= Time.deltaTime;
             }
 
-            if (GamblerCrestUtils.feverTimer <= 0)
+            if (GamblerCrestUtils.bfTimer > 0)
             {
-                GamblerCrestUtils.inFeverState = false;
+                GamblerCrestUtils.bfTimer -= Time.deltaTime * (1 + (GamblerCrestUtils.bfComboMult * GamblerCrestUtils.combo));
+            }
+
+            if (GamblerCrestUtils.bfTimer <= 0)
+            {
+                GamblerCrestUtils.BlackFlashChanceBonus -= 1;
             }
         }
 

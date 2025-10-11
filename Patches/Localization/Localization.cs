@@ -17,11 +17,14 @@ public static class Localization
     {
         Dictionary<string, Dictionary<string, string>> fullStore = Helper.GetPrivateStaticField<Dictionary<string, Dictionary<string, string>>>(typeof(Language), "_currentEntrySheets");
 
-        fullStore.Add("GAMBLER", new Dictionary<string, string>()
+        if (!fullStore.ContainsKey("GAMBER"))
         {
-            { "GAMBLERCRESTNAME", "High-Stakes" },
-            { "GAMBLERCRESTDESC", "Test your luck and strive in battle" }
-        });
+            fullStore.Add("GAMBLER", new Dictionary<string, string>()
+            {
+                { "GAMBLERCRESTNAME", "High-Stakes" },
+                { "GAMBLERCRESTDESC", "Test your luck and strive in battle" }
+            });
+        }
 
         Helper.SetPrivateStaticField(typeof(Language), "_currentEntrySheets", fullStore);
         LocalizationPatched = true;

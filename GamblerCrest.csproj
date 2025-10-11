@@ -18,8 +18,8 @@
 
 	<PropertyGroup>
 		<!--These properties will control the generated PluginInfo. Version is also used by various parts of the build system.-->
-		<BepInExPluginGuid>test</BepInExPluginGuid>
-		<BepInExPluginName>Test</BepInExPluginName>
+		<BepInExPluginGuid>gamblercrest</BepInExPluginGuid>
+		<BepInExPluginName>Gambler Crest</BepInExPluginName>
 		<Version>0.1.0</Version>
 	</PropertyGroup>
 

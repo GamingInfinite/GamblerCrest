@@ -30,7 +30,7 @@ namespace GamblerCrest.Patches
             Sprite crestGlow = reaper.CrestGlow;
 
             Texture2D diceCrestSilhouette = ModHelper.LoadTexFromAssembly("GamblerCrest.Resources.Images.gamblerCrestSilhouette.png");
-            Sprite crestSilhouette = Sprite.Create(diceCrestSilhouette, new(0, 0, diceCrestSilhouette.width, diceCrestSilhouette.height), new(0.5f, 0.5f), 300f);
+            Sprite crestSilhouette = Sprite.Create(diceCrestSilhouette, new(0, 0, diceCrestSilhouette.width, diceCrestSilhouette.height), new(0.5f, 0.5f), 320f);
 
             Texture2D diceCrest = ModHelper.LoadTexFromAssembly("GamblerCrest.Resources.Images.gamblerCrest.png");
             Sprite crestSprite = Sprite.Create(diceCrest, new(0, 0, diceCrest.width, diceCrest.height), new(0.5f, 0.5f), 166.67f);
@@ -120,21 +120,31 @@ namespace GamblerCrest.Patches
                     NavDownFallbackIndex = -1,
                 },
             ];
-            GamblerCrestUtils.gamblerCrestData.SaveData = GamblerCrestUtils.crestSave;
+            GamblerCrestUtils.gamblerCrestData.SaveData = GamblerCrestUtils.CrestSave;
 
             ToolItemManager.Instance.crestList.Add(GamblerCrestUtils.gamblerCrestData);
 
+            #region BindFsmEdits
             PlayMakerFSM bind = __instance.gameObject.GetFsmPreprocessed("Bind");
+            FsmBool gamblerEquipped = bind.AddBoolVariable("Is Gambler Equipped");
+            FsmState CanBind = bind.GetState("Can Bind?");
+            CanBind.AddAction(new CheckIfCrestEquipped()
+            {
+                Crest = GamblerCrestUtils.gamblerCrestData,
+                storeValue = gamblerEquipped
+            });
+
+
             FsmState BindType = bind.GetState("Bind Type");
 
             FsmState GamblerBind = bind.AddState("Gambler Bind");
-            BindType.AddTransition("GAMBLER", GamblerBind.name);
-            BindType.AddLambdaMethod((action) =>
+            FsmEvent GamblerTrans = BindType.AddTransition("GAMBLER", GamblerBind.name);
+
+            BindType.AddAction(new BoolTest()
             {
-                if (GamblerCrestUtils.gamblerCrestData.IsEquipped)
-                {
-                    bind.SendEvent("GAMBLER");
-                }
+                boolVariable = gamblerEquipped,
+                isTrue = GamblerTrans,
+                everyFrame = false
             });
 
             GamblerBind.AddLambdaMethod((action) =>
@@ -145,30 +155,33 @@ namespace GamblerCrest.Patches
                 int randomChance = Random.Range(1, 21);
                 randomChance = 20;
                 GamblerCrest.logger.LogInfo($"{randomChance}");
+                int healAmount = 0;
 
-                if (randomChance == 20)
+                if (ToolItemManager.Instance.toolItems.GetByName(""))
                 {
-                    bind.GetIntVariable("Heal Amount").Value = PlayerData.instance.maxHealth;
-                    GamblerCrestUtils.inFeverState = true;
-                } else if (randomChance >= 17)
-                {
-                    bind.GetIntVariable("Heal Amount").Value = 3;
-                } else if (randomChance >= 14)
-                {
-                    bind.GetIntVariable("Heal Amount").Value = 2;
-                } else if (randomChance >= 9)
-                {
-                    bind.GetIntVariable("Heal Amount").Value = 1;
-                } else if (randomChance >= 5)
-                {
-                    bind.GetIntVariable("Heal Amount").Value = 0;
-                } else if (randomChance >= 2)
-                {
-                    bind.GetIntVariable("Heal Amount").Value = -1;
-                } else if (randomChance == 1)
-                {
-                    bind.GetIntVariable("Heal Amount").Value = -2;
+
                 }
+                healAmount = randomChance switch
+                {
+                    20 => PlayerData.instance.maxHealth,
+                    >= 17 => 3,
+                    >= 14 => 2,
+                    >= 9 => 1,
+                    >= 5 => 0,
+                    >= 2 => -1,
+                    _ => -2
+                };
+
+                if (healAmount == PlayerData.instance.maxHealth)
+                {
+                    GamblerCrestUtils.InFeverState = true;
+                    GamblerCrestUtils.activateAura();
+                } else if (healAmount < 0)
+                {
+                    HeroController.instance.TakeHealth(Mathf.Abs(healAmount));
+                }
+
+                bind.GetIntVariable("Heal Amount").Value = healAmount;
             });
 
             FsmState QuickBind = bind.GetState("Quick Bind?");
@@ -177,6 +190,12 @@ namespace GamblerCrest.Patches
             {
                 bind.SendEvent("FINISHED");
             });
+            #endregion
+
+            #region SilkArtFsmEdits 
+            #endregion
+
+            GamblerCrestUtils.poisonAura = __instance.quickeningEffectPrefab;
         }
     }
 }

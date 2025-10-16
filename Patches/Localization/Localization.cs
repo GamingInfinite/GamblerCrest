@@ -6,18 +6,15 @@ using TeamCherry.Localization;
 
 namespace GamblerCrest.Patches.Localization;
 
-[HarmonyPatch]
+[HarmonyPatch(typeof(Language), nameof(Language.SwitchLanguage), typeof(LanguageCode))]
 public static class Localization
 {
-    public static bool LocalizationPatched = false;
-
-    [HarmonyPatch(typeof(Language), nameof(Language.SwitchLanguage), typeof(LanguageCode))]
     [HarmonyPostfix]
     private static void AddNewSheet()
     {
-        Dictionary<string, Dictionary<string, string>> fullStore = Helper.GetPrivateStaticField<Dictionary<string, Dictionary<string, string>>>(typeof(Language), "_currentEntrySheets");
+        Dictionary<string, Dictionary<string, string>> fullStore = Language._currentEntrySheets;
 
-        if (!fullStore.ContainsKey("GAMBER"))
+        if (!fullStore.ContainsKey("GAMBLER"))
         {
             fullStore.Add("GAMBLER", new Dictionary<string, string>()
             {
@@ -26,28 +23,6 @@ public static class Localization
             });
         }
 
-        Helper.SetPrivateStaticField(typeof(Language), "_currentEntrySheets", fullStore);
-        LocalizationPatched = true;
-    }
-}
-
-public static class Helper
-{
-    public static void SetPrivateStaticField<T>(Type type, string fieldName, T value)
-    {
-        var field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
-        if (field == null)
-            throw new MissingFieldException(type.FullName, fieldName);
-
-        field.SetValue(null, value); // null because it's static
-    }
-
-    public static T GetPrivateStaticField<T>(Type type, string fieldName)
-    {
-        var field = type.GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
-        if (field == null)
-            throw new MissingFieldException(type.FullName, fieldName);
-
-        return (T)field.GetValue(null); // null because it's static
+        Language._currentEntrySheets = fullStore;
     }
 }

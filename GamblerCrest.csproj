@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- 
   Imports silksong path properties only if present in order to allow CI builds. The file should be gitignored.
@@ -24,16 +24,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Reference Include="C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight Silksong\BepInEx\plugins\Silksong.FsmUtil.dll"></Reference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
 		<PackageReference Include="BepInEx.Core" Version="5.4.21" />
+		<PackageReference Include="Silksong.FsmUtil" Version="0.1.0" />
 		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.1.0" />
 		<PackageReference Include="UnityEngine.Modules" Version="6000.0.50" IncludeAssets="compile" />
 		<!--If you're unable resolve this dependency, check that you're using the nuget v3 package feed instead of v2.-->
-		<PackageReference Include="Silksong.GameLibs" Version="1.0.0-silksong1.0.28324" />
+		<PackageReference Include="Silksong.GameLibs" Version="1.1.0-silksong1.0.28714" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="$(SilksongFolder)\BepInEx\plugins\Needleforge\Needleforge.dll"></Reference>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -37,7 +37,7 @@ namespace GamblerCrest
 
             hakariCrest = NeedleforgePlugin.AddCrest("GAMBLER", crestSprite, crestSilhouette);
 
-            hakariCrest.BindEvent += (healValue, healAmount, healTime) =>
+            hakariCrest.BindEvent += (healValue, healAmount, healTime, fsm) =>
             {
                 healAmount.Value = 1;
                 healTime.Value = 1.2f;
@@ -76,78 +76,11 @@ namespace GamblerCrest
                 healValue.Value = randomHeal;
             };
 
-            hakariCrest.slots = [
-                new() {
-                    AttackBinding = AttackToolBinding.Neutral,
-                    Type = ToolItemType.Skill,
-                    Position = new(.805f, .2f),
-                    IsLocked = false,
-                    NavUpIndex = 1,
-                    NavUpFallbackIndex = -1,
-                    NavRightIndex = 4,
-                    NavRightFallbackIndex = -1,
-                    NavLeftIndex = 3,
-                    NavLeftFallbackIndex = -1,
-                    NavDownIndex = 2,
-                    NavDownFallbackIndex = -1,
-                },
-                new() {
-                    AttackBinding = AttackToolBinding.Up,
-                    Type = ToolItemType.Red,
-                    Position = new(-.2f, 2.05f),
-                    IsLocked = false,
-                    NavUpIndex = -1,
-                    NavUpFallbackIndex = -1,
-                    NavRightIndex = -1,
-                    NavRightFallbackIndex = -1,
-                    NavLeftIndex = -1,
-                    NavLeftFallbackIndex = -1,
-                    NavDownIndex = 0,
-                    NavDownFallbackIndex = -1,
-                },
-                new() {
-                    AttackBinding = AttackToolBinding.Down,
-                    Type = ToolItemType.Skill,
-                    Position = new(-.765f, -1.15f),
-                    IsLocked = false,
-                    NavUpIndex = 0,
-                    NavUpFallbackIndex = -1,
-                    NavRightIndex = -1,
-                    NavRightFallbackIndex = -1,
-                    NavLeftIndex = -1,
-                    NavLeftFallbackIndex = -1,
-                    NavDownIndex = -1,
-                    NavDownFallbackIndex = -1,
-                },
-                new() {
-                    AttackBinding = AttackToolBinding.Neutral,
-                    Type = ToolItemType.Yellow,
-                    Position = new(-2.6f, 3.00f),
-                    IsLocked = false,
-                    NavUpIndex = -1,
-                    NavUpFallbackIndex = -1,
-                    NavRightIndex = 0,
-                    NavRightFallbackIndex = -1,
-                    NavLeftIndex = -1,
-                    NavLeftFallbackIndex = -1,
-                    NavDownIndex = -1,
-                    NavDownFallbackIndex = -1,
-                },
-                new() {
-                    AttackBinding = AttackToolBinding.Neutral,
-                    Type = ToolItemType.Yellow,
-                    Position = new(1.255f, -3.125f),
-                    IsLocked = false,
-                    NavUpIndex = -1,
-                    NavUpFallbackIndex = -1,
-                    NavRightIndex = -1,
-                    NavRightFallbackIndex = -1,
-                    NavLeftIndex = 0,
-                    NavLeftFallbackIndex = -1,
-                    NavDownIndex = -1,
-                    NavDownFallbackIndex = -1,
-                },
-            ];
+            hakariCrest.AddSkillSlot(AttackToolBinding.Neutral, new(.805f, .2f), false);
+            hakariCrest.AddSkillSlot(AttackToolBinding.Down, new(-.765f, -1.15f), false);
+            hakariCrest.AddRedSlot(AttackToolBinding.Up, new(-.2f, 2.05f), false);
+            hakariCrest.AddYellowSlot(new(-2.6f, 3.00f), false);
+            hakariCrest.AddYellowSlot(new(1.255f, -3.125f), false);
 
             SceneManager.activeSceneChanged += OnSceneChanged;
         }

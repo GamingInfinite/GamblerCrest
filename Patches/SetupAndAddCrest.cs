@@ -1,11 +1,4 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
-using TeamCherry.Localization;
-using UnityEngine;
-using Silksong.FsmUtil;
-using HutongGames.PlayMaker;
-using GenericVariableExtension;
-using HutongGames.PlayMaker.Actions;
+﻿using HarmonyLib;
 using GamblerCrest.Utils;
 
 namespace GamblerCrest.Patches

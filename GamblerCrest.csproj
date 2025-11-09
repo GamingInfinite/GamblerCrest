@@ -14,6 +14,7 @@
 			https://nuget.bepinex.dev/v3/index.json
 		</RestoreAdditionalProjectSources>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<NeutralLanguage>en</NeutralLanguage>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -34,7 +35,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="$(SilksongFolder)\BepInEx\plugins\Needleforge\Needleforge.dll"></Reference>
+		<Reference Include="$(SilksongFolder)\BepInEx\plugins\Voidlings-Needleforge\Needleforge.dll"></Reference>
 	</ItemGroup>
 
 	<ItemGroup>

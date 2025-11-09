@@ -1,16 +1,15 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using GamblerCrest.Patches;
-using GamblerCrest.Patches.Localization;
-using UnityEngine.SceneManagement;
 using UnityEngine;
 using GamblerCrest.Utils;
 using Needleforge.Data;
 using Needleforge;
+using TeamCherry.Localization;
 
 namespace GamblerCrest
 {
+    [BepInDependency("org.silksong-modding.i18n")]
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class GamblerCrest : BaseUnityPlugin
     {
@@ -24,10 +23,7 @@ namespace GamblerCrest
             logger = Logger;
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has loaded!");
             harmony = new("com.example.patch");
-            harmony.PatchAll(typeof(SetupAndAddCrest));
-            harmony.PatchAll(typeof(BlackFlash));
-            harmony.PatchAll(typeof(AlterLayering));
-            harmony.PatchAll(typeof(NeedleArtWhiffPunish));
+            harmony.PatchAll();
 
             Texture2D diceCrestSilhouette = ModHelper.LoadTexFromAssembly("GamblerCrest.Resources.Images.gamblerCrestSilhouette.png");
             Sprite crestSilhouette = Sprite.Create(diceCrestSilhouette, new(0, 0, diceCrestSilhouette.width, diceCrestSilhouette.height), new(0.5f, 0.5f), 320f);
@@ -35,7 +31,12 @@ namespace GamblerCrest
             Texture2D diceCrest = ModHelper.LoadTexFromAssembly("GamblerCrest.Resources.Images.gamblerCrest.png");
             Sprite crestSprite = Sprite.Create(diceCrest, new(0, 0, diceCrest.width, diceCrest.height), new(0.5f, 0.5f), 166.67f);
 
-            hakariCrest = NeedleforgePlugin.AddCrest("GAMBLER", crestSprite, crestSilhouette);
+            hakariCrest = NeedleforgePlugin.AddCrest("GAMBLER", 
+                new(){Key = "GamblerCrestName", Sheet = $"Mods.{PluginInfo.PLUGIN_GUID}"}, 
+                new(){Key = "GamblerCrestDesc", Sheet = $"Mods.{PluginInfo.PLUGIN_GUID}"}, 
+                crestSprite, 
+                crestSilhouette);
+            hakariCrest.HudFrame.Preset = VanillaCrest.ARCHITECT;
 
             hakariCrest.BindEvent += (healValue, healAmount, healTime, fsm) =>
             {
@@ -50,7 +51,7 @@ namespace GamblerCrest
 
                 if (ToolItemManager.Instance.toolItems.GetByName(""))
                 {
-
+    
                 }
                 randomHeal = randomChance switch
                 {
@@ -81,8 +82,6 @@ namespace GamblerCrest
             hakariCrest.AddRedSlot(AttackToolBinding.Up, new(-.2f, 2.05f), false);
             hakariCrest.AddYellowSlot(new(-2.6f, 3.00f), false);
             hakariCrest.AddYellowSlot(new(1.255f, -3.125f), false);
-
-            SceneManager.activeSceneChanged += OnSceneChanged;
         }
 
         private void Update()
@@ -111,14 +110,6 @@ namespace GamblerCrest
             if (GamblerCrestUtils.bfTimer <= 0)
             {
                 GamblerCrestUtils.BlackFlashChanceBonus -= 1;
-            }
-        }
-
-        private void OnSceneChanged(Scene prev, Scene next)
-        {
-            if (next.name != "Menu_Title")
-            {
-                harmony.PatchAll(typeof(Localization));
             }
         }
     }
